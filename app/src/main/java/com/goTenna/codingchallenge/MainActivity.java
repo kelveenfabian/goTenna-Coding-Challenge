@@ -1,4 +1,4 @@
-package com.goTenna.codingchallenge.view;
+package com.goTenna.codingchallenge;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
