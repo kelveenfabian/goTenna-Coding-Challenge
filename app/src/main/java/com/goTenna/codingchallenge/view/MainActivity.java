@@ -1,7 +1,9 @@
-package com.goTenna.codingchallenge;
+package com.goTenna.codingchallenge.view;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import com.goTenna.codingchallenge.R;
 
 public class MainActivity extends AppCompatActivity {
 
