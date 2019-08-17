@@ -11,18 +11,23 @@ import com.goTenna.codingchallenge.data.model.Location;
 
 import java.util.List;
 
+import io.reactivex.Completable;
+import io.reactivex.Flowable;
+import io.reactivex.Observable;
+import io.reactivex.Single;
+
 @Dao
 public interface LocationDao {
 
     @Insert
-    void insert(Location location);
+    Completable insert(Location location);
 
     @Delete
-    void delete(Location location);
+    Completable delete(Location location);
 
     @Query("DELETE FROM location_table")
-    void deleteAllLocations();
+    Completable deleteAllLocations();
 
     @Query("SELECT * FROM location_table ORDER BY id ASC")
-    LiveData<List<Location>> getAllLocations();
+    Single<List<Location>> getAllLocations();
 }
