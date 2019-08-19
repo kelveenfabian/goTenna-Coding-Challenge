@@ -20,8 +20,6 @@ public class Location {
         this.description = description;
     }
 
-    public Location(){}
-
     public int getId() {
         return id;
     }

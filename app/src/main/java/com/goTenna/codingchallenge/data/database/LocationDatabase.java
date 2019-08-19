@@ -7,7 +7,7 @@ import android.content.Context;
 
 import com.goTenna.codingchallenge.data.model.Location;
 
-@Database(entities = {Location.class}, version = 1)
+@Database(entities = {Location.class}, version = 1, exportSchema = false)
 public abstract class LocationDatabase extends RoomDatabase {
     private static LocationDatabase instance;
     private static final String DB_NAME = "location_db";
