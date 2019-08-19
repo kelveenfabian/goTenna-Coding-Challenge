@@ -1,31 +1,49 @@
 package com.goTenna.codingchallenge.viewmodel;
 
 import android.app.Application;
+import android.arch.lifecycle.AndroidViewModel;
+import android.arch.lifecycle.LiveData;
+import android.support.annotation.NonNull;
 
 import com.goTenna.codingchallenge.data.model.Location;
 import com.goTenna.codingchallenge.data.repository.LocationRepository;
 
 import java.util.List;
 
-
-public class LocationViewModel {
-    private static final String TAG = "TAG";
-    private LocationRepository locationRepository;
-    private List<Location> locationList;
+import io.reactivex.Flowable;
 
 
-    public LocationViewModel(Application application){
-        locationRepository = new LocationRepository(application);
-        locationList = locationRepository.getAllLocations();
+public class LocationViewModel extends AndroidViewModel {
+    private LocationRepository repository;
+
+    public LocationViewModel(@NonNull Application application) {
+        super(application);
+        repository = LocationRepository.getInstance(application);
     }
 
-    public List<Location> getLocationList() {
-        return locationList;
+    public void insertLocation(Location location){
+        repository.insertLocation(location);
     }
 
+    public void deleteLocation(Location location){
+        repository.deleteLocation(location);
+    }
 
+    public void deleteAllLocations(){
+        repository.deleteAllLocations();
+    }
 
+    public Flowable<List<Location>> getAllLocations(){
+        return repository.getAllLocations();
+    }
 
+    public LiveData<List<Location>> makeQuery(){
+        return repository.getLocationsFromApi();
+    }
 
-
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        repository.getDisposables().clear();
+    }
 }
