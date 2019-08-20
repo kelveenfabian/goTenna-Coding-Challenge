@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 
 import com.goTenna.codingchallenge.R;
 import com.goTenna.codingchallenge.data.model.Location;
@@ -42,13 +43,13 @@ public class MainActivity extends AppCompatActivity {
         viewModel = ViewModelProviders.of(this).get(LocationViewModel.class);
     }
 
-    public void setRecyclerView(List<Location> locationList) {
+    public void setRecyclerView(final List<Location> locationList) {
         LocationAdapter adapter = new LocationAdapter(locationList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
     }
 
-    public void checkState(Bundle savedInstanceState) {
+    public void checkState(final Bundle savedInstanceState) {
         if (savedInstanceState != null) {
             isDataSaved = savedInstanceState.getBoolean(DATASAVED);
         }
@@ -60,12 +61,14 @@ public class MainActivity extends AppCompatActivity {
     public void setViewModel() {
         if (isDataSaved || isDataSavedInPrefs) {
             getLocations();
+            Log.d(MapActivity.TAG, "SavedInstance");
         } else {
             viewModel.deleteAllLocations();
             viewModel.callRetroFit();
             isDataSaved = true;
             sharedPrefs.edit().putBoolean(DATASAVED, isDataSaved).apply();
             getLocations();
+            Log.d(MapActivity.TAG, "RetroFitCall");
         }
     }
 

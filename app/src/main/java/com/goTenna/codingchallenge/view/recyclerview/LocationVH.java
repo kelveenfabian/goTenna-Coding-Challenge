@@ -1,16 +1,18 @@
 package com.goTenna.codingchallenge.view.recyclerview;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.goTenna.codingchallenge.R;
 import com.goTenna.codingchallenge.data.model.Location;
+import com.goTenna.codingchallenge.view.MapActivity;
 
 public class LocationVH extends RecyclerView.ViewHolder {
+
     private TextView nameView;
     private TextView descriptionView;
     private CardView locationCard;
@@ -22,17 +24,17 @@ public class LocationVH extends RecyclerView.ViewHolder {
         locationCard = itemView.findViewById(R.id.location_card);
     }
 
-    public void onBind(Location location){
+    public void onBind(final Location location){
         String name = location.getName();
         String description = location.getDescription();
 
         nameView.setText(name);
         descriptionView.setText(description);
-        locationCard.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(v.getContext(), "I'm clickable!", Toast.LENGTH_SHORT).show();
-            }
+        locationCard.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), MapActivity.class);
+            intent.putExtra(MapActivity.LAT, location.getLatitude());
+            intent.putExtra(MapActivity.LNG, location.getLongitude());
+            v.getContext().startActivity(intent);
         });
 
 

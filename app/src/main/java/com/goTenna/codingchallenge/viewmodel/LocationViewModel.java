@@ -17,17 +17,9 @@ import io.reactivex.Observable;
 public class LocationViewModel extends AndroidViewModel {
     private LocationRepository repository;
 
-    public LocationViewModel(@NonNull Application application) {
+    public LocationViewModel(@NonNull final Application application) {
         super(application);
         repository = LocationRepository.getInstance(application);
-    }
-
-    public void insertLocation(Location location) {
-        repository.insertLocation(location);
-    }
-
-    public void deleteLocation(Location location) {
-        repository.deleteLocation(location);
     }
 
     public void deleteAllLocations() {
@@ -36,10 +28,6 @@ public class LocationViewModel extends AndroidViewModel {
 
     public Flowable<List<Location>> getAllLocations() {
         return repository.getAllLocations();
-    }
-
-    public List<Location> isEmpty(){
-        return repository.isEmpty();
     }
 
     public void callRetroFit() {

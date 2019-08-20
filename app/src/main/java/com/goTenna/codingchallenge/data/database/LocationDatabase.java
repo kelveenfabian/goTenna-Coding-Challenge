@@ -14,7 +14,7 @@ public abstract class LocationDatabase extends RoomDatabase {
 
     public abstract LocationDao locationDao();
 
-    public static synchronized LocationDatabase getInstance(Context context) {
+    public static synchronized LocationDatabase getInstance(final Context context) {
         if (instance == null) {
             instance = Room.databaseBuilder(context.getApplicationContext(), LocationDatabase.class, DB_NAME)
                     .fallbackToDestructiveMigration()

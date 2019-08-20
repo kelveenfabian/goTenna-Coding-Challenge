@@ -17,14 +17,9 @@ import io.reactivex.Observable;
 public interface LocationDao {
 
     @Insert
-    void insert(Location location);
-
-    @Delete
-    void delete(Location location);
+    void insert(final Location location);
 
     @Query("SELECT * FROM location_table ORDER BY id ASC")
     Flowable<List<Location>> getAllLocations();
 
-    @Query("SELECT * FROM location_table Limit 1")
-    List<Location> isEmpty();
 }
