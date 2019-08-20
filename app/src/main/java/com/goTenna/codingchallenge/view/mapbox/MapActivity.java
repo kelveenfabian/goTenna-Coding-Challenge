@@ -41,12 +41,14 @@ import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import java.util.List;
 
 public class MapActivity extends AppCompatActivity implements
-        PermissionsListener, OnMapReadyCallback {
+        PermissionsListener, OnMapReadyCallback, OnLocationClickListener, OnCameraTrackingChangedListener {
     public static final String TAG = "TAG";
     private MapView mapView;
     private MapboxMap mapboxMap;
     private PermissionsManager permissionsManager;
+    private LocationEngine locationEngine;
     private LocationListeningCallback callback;
+    private Location originLocation;
     private LocationComponent locationComponent;
     private FloatingActionButton fab;
     private boolean isTracking = false;
@@ -95,11 +97,8 @@ public class MapActivity extends AppCompatActivity implements
         symbolLayer.withProperties(
                 PropertyFactory.iconImage("marker-icon-id")
         );
-
         style.addLayer(symbolLayer);
     }
-
-
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
@@ -136,26 +135,55 @@ public class MapActivity extends AppCompatActivity implements
 
     }
 
-    @SuppressLint("MissingPermission")
     private void enableLocationComponent(Style style, double lat, double lng) {
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
-            mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 16f));
-
-            fab.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if(!isTracking){
-
-                    }else{
-
-                    }
-                }
-            });
+           locationComponenetSetup(style);
+           mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 16f));
+           fabClick();
 
         } else {
             permissionsManager = new PermissionsManager(this);
             permissionsManager.requestLocationPermissions(this);
         }
+    }
+
+    public void fabClick(){
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!isTracking) {
+                    isTracking = true;
+                    locationComponent.setCameraMode(CameraMode.TRACKING);
+                    locationComponent.zoomWhileTracking(16f);
+                    Toast.makeText(MapActivity.this, "GOING TO CURRENT LOCATION", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(MapActivity.this, "LOCATION ALREADY ENABLED", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
+    @SuppressLint("MissingPermission")
+    public void locationComponenetSetup(Style style){
+        LocationComponentOptions customLocationComponentOptions = LocationComponentOptions.builder(this)
+                .elevation(5)
+                .accuracyAlpha(.6f)
+                .build();
+
+        locationComponent = mapboxMap.getLocationComponent();
+
+        LocationComponentActivationOptions locationComponentActivationOptions =
+                LocationComponentActivationOptions.builder(this, style)
+                        .locationComponentOptions(customLocationComponentOptions)
+                        .build();
+
+
+        locationComponent.activateLocationComponent(locationComponentActivationOptions);
+        locationComponent.setLocationComponentEnabled(true);
+        locationComponent.setCameraMode(CameraMode.TRACKING);
+        locationComponent.setRenderMode(RenderMode.COMPASS);
+        locationComponent.addOnLocationClickListener(this);
+        locationComponent.addOnCameraTrackingChangedListener(this);
     }
 
 
@@ -171,7 +199,6 @@ public class MapActivity extends AppCompatActivity implements
                 @Override
                 public void onStyleLoaded(@NonNull Style style) {
                     enableLocationComponent(style, lat, lng);
-                    createMarker(style);
                 }
             });
         } else {
@@ -213,6 +240,9 @@ public class MapActivity extends AppCompatActivity implements
     @Override
     protected void onStop() {
         super.onStop();
+        if (locationEngine != null) {
+            locationEngine.removeLocationUpdates(callback);
+        }
         mapView.onStop();
     }
 
@@ -222,4 +252,21 @@ public class MapActivity extends AppCompatActivity implements
         mapView.onDestroy();
     }
 
+
+    @Override
+    public void onLocationComponentClick() {
+        if (locationComponent.getLastKnownLocation() != null) {
+            Toast.makeText(this, "Clicking location component", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onCameraTrackingDismissed() {
+        isTracking = false;
+    }
+
+    @Override
+    public void onCameraTrackingChanged(int currentMode) {
+
+    }
 }
