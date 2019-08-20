@@ -13,6 +13,7 @@ import io.reactivex.Completable;
 import io.reactivex.CompletableObserver;
 import io.reactivex.Flowable;
 
+import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -37,6 +38,10 @@ public class LocationRepository {
     @SuppressLint("CheckResult")
     public Flowable<List<Location>> getAllLocations() {
         return locationDatabase.locationDao().getAllLocations();
+    }
+
+    public List<Location> isEmpty(){
+        return locationDatabase.locationDao().isEmpty();
     }
 
     @SuppressLint("CheckResult")

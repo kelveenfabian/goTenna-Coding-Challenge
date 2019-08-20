@@ -2,31 +2,28 @@ package com.goTenna.codingchallenge.view;
 
 import android.annotation.SuppressLint;
 import android.arch.lifecycle.ViewModelProviders;
-import android.support.annotation.NonNull;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.widget.Toast;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 
 import com.goTenna.codingchallenge.R;
 import com.goTenna.codingchallenge.data.model.Location;
-import com.goTenna.codingchallenge.data.repository.LocationRepository;
+import com.goTenna.codingchallenge.view.recyclerview.LocationAdapter;
 import com.goTenna.codingchallenge.viewmodel.LocationViewModel;
-import com.mapbox.android.core.permissions.PermissionsManager;
-import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.mapboxsdk.maps.MapView;
-import com.mapbox.mapboxsdk.maps.Style;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 
 public class MainActivity extends AppCompatActivity {
     public static final String DATASAVED = "DATA_SAVED";
+    public static final String SAVESTATE = "SAVE_STATE";
     private LocationViewModel viewModel;
-    private final List<Location> locationList = new ArrayList<>();
-
+    private RecyclerView recyclerView;
+    private SharedPreferences sharedPrefs;
+    private boolean isDataSavedInPrefs;
     private boolean isDataSaved;
 
     @SuppressLint("CheckResult")
@@ -34,32 +31,41 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        initializeViews();
+        initialize();
         checkState(savedInstanceState);
         setViewModel();
     }
 
-    public void initializeViews() {
+    public void initialize() {
+        recyclerView = findViewById(R.id.locations_rv);
+        sharedPrefs = getSharedPreferences(SAVESTATE, MODE_PRIVATE);
+        viewModel = ViewModelProviders.of(this).get(LocationViewModel.class);
+    }
+
+    public void setRecyclerView(List<Location> locationList) {
+        LocationAdapter adapter = new LocationAdapter(locationList);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setAdapter(adapter);
     }
 
     public void checkState(Bundle savedInstanceState) {
         if (savedInstanceState != null) {
             isDataSaved = savedInstanceState.getBoolean(DATASAVED);
         }
+        if(sharedPrefs.contains(DATASAVED)){
+            isDataSavedInPrefs = sharedPrefs.getBoolean(DATASAVED, false);
+        }
     }
 
-
     public void setViewModel() {
-        viewModel = ViewModelProviders.of(this).get(LocationViewModel.class);
-        if (isDataSaved) {
+        if (isDataSaved || isDataSavedInPrefs) {
             getLocations();
-            Log.d(LocationRepository.TAG, "RoomWithRx After SavedInstance");
         } else {
             viewModel.deleteAllLocations();
             viewModel.callRetroFit();
             isDataSaved = true;
+            sharedPrefs.edit().putBoolean(DATASAVED, isDataSaved).apply();
             getLocations();
-            Log.d(LocationRepository.TAG, "RoomWithRx After Retrofit Call");
         }
     }
 
@@ -68,9 +74,7 @@ public class MainActivity extends AppCompatActivity {
         if (viewModel.getAllLocations() != null) {
             viewModel.getAllLocations()
                     .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(locations -> {
-                        locationList.addAll(locations);
-                    }, throwable -> Toast.makeText(MainActivity.this, throwable.getMessage(), Toast.LENGTH_SHORT).show());
+                    .subscribe(this::setRecyclerView, Throwable::printStackTrace);
         }
     }
 

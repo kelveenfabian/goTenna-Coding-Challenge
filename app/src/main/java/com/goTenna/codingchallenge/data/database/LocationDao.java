@@ -11,6 +11,7 @@ import com.goTenna.codingchallenge.data.model.Location;
 import java.util.List;
 
 import io.reactivex.Flowable;
+import io.reactivex.Observable;
 
 @Dao
 public interface LocationDao {
@@ -23,4 +24,7 @@ public interface LocationDao {
 
     @Query("SELECT * FROM location_table ORDER BY id ASC")
     Flowable<List<Location>> getAllLocations();
+
+    @Query("SELECT * FROM location_table Limit 1")
+    List<Location> isEmpty();
 }
