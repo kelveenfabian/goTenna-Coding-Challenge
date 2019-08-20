@@ -15,8 +15,10 @@ import io.reactivex.Completable;
 import io.reactivex.CompletableObserver;
 import io.reactivex.Flowable;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 public class LocationRepository {
@@ -25,50 +27,50 @@ public class LocationRepository {
     private static LocationRepository instance;
     private CompositeDisposable disposables = new CompositeDisposable();
 
-    private LocationRepository(Application application){
+    private LocationRepository(Application application) {
         locationDatabase = LocationDatabase.getInstance(application.getApplicationContext());
     }
 
-    public static LocationRepository getInstance(Application application){
-        if(instance == null){
+    public static LocationRepository getInstance(Application application) {
+        if (instance == null) {
             instance = new LocationRepository(application);
         }
         return instance;
     }
 
     @SuppressLint("CheckResult")
-    public Flowable<List<Location>> getAllLocations(){
+    public Flowable<List<Location>> getAllLocations() {
         return locationDatabase.locationDao().getAllLocations();
     }
 
     @SuppressLint("CheckResult")
-    public void insertLocation(final Location location){
+    public void insertLocation(final Location location) {
 //        Completable.fromAction(() -> locationDatabase.locationDao().insert(location));
 
         Completable.fromRunnable(() -> locationDatabase.locationDao().insert(location))
                 .subscribeOn(Schedulers.io())
-        .subscribe(new CompletableObserver() {
-            @Override
-            public void onSubscribe(Disposable d) {
-                disposables.add(d);
-            }
+                .subscribe(new CompletableObserver() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        disposables.add(d);
+                    }
 
-            @Override
-            public void onComplete() {
+                    @Override
+                    public void onComplete() {
 
-            }
+                    }
 
-            @Override
-            public void onError(Throwable e) {
-                e.printStackTrace();
-            }
-        });
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                    }
+                });
 
 //        locationDatabase.locationDao().insert(location);
     }
 
     @SuppressLint("CheckResult")
-    public void deleteLocation(final Location location){
+    public void deleteLocation(final Location location) {
 //        Completable.fromAction(() -> locationDatabase.locationDao().delete(location));
 
         Completable.fromRunnable(() -> locationDatabase.locationDao().delete(location))
@@ -94,7 +96,7 @@ public class LocationRepository {
     }
 
     @SuppressLint("CheckResult")
-    public void deleteAllLocations(){
+    public void deleteAllLocations() {
         Completable.fromAction(() -> locationDatabase.clearAllTables());
 
         Completable.fromRunnable(() -> locationDatabase.clearAllTables())
@@ -120,11 +122,19 @@ public class LocationRepository {
     }
 
 
-    public LiveData<List<Location>> getLocationsFromApi(){
-        return LiveDataReactiveStreams.fromPublisher(LocationRetroFit
+    @SuppressLint("CheckResult")
+    public void callRetroFit() {
+        LocationRetroFit
                 .getService()
                 .getLocation()
-                .observeOn(Schedulers.io()));
+                .subscribeOn(Schedulers.io())
+                .subscribe(locations -> {
+                    if (locations != null) {
+                        for (int i = 0; i < locations.size(); i++) {
+                            insertLocation(locations.get(i));
+                        }
+                    }
+                }, Throwable::printStackTrace);
     }
 
     public CompositeDisposable getDisposables() {

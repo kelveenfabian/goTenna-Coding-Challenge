@@ -21,24 +21,24 @@ public class LocationViewModel extends AndroidViewModel {
         repository = LocationRepository.getInstance(application);
     }
 
-    public void insertLocation(Location location){
+    public void insertLocation(Location location) {
         repository.insertLocation(location);
     }
 
-    public void deleteLocation(Location location){
+    public void deleteLocation(Location location) {
         repository.deleteLocation(location);
     }
 
-    public void deleteAllLocations(){
+    public void deleteAllLocations() {
         repository.deleteAllLocations();
     }
 
-    public Flowable<List<Location>> getAllLocations(){
+    public Flowable<List<Location>> getAllLocations() {
         return repository.getAllLocations();
     }
 
-    public LiveData<List<Location>> makeQuery(){
-        return repository.getLocationsFromApi();
+    public void callRetroFit() {
+        repository.callRetroFit();
     }
 
     @Override
