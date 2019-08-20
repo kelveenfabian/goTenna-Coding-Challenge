@@ -34,6 +34,7 @@ public class LocationVH extends RecyclerView.ViewHolder {
             Intent intent = new Intent(v.getContext(), MapActivity.class);
             intent.putExtra(MapActivity.LAT, locationObject.getLatitude());
             intent.putExtra(MapActivity.LNG, locationObject.getLongitude());
+            intent.putExtra(MapActivity.NAME, locationObject.getName());
             v.getContext().startActivity(intent);
         });
 

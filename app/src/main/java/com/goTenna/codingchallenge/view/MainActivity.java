@@ -62,14 +62,12 @@ public class MainActivity extends AppCompatActivity {
     public void setViewModel() {
         if (isDataSaved || isDataSavedInPrefs) {
             getLocations();
-            Log.d(MapActivity.TAG, "SavedInstance");
         } else {
             viewModel.deleteAllLocations();
             viewModel.callRetroFit();
             isDataSaved = true;
             sharedPrefs.edit().putBoolean(DATASAVED, isDataSaved).apply();
             getLocations();
-            Log.d(MapActivity.TAG, "RetroFitCall");
         }
     }
 

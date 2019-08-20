@@ -2,7 +2,6 @@ package com.goTenna.codingchallenge.view.mapbox;
 
 import android.annotation.SuppressLint;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -13,14 +12,14 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.goTenna.codingchallenge.R;
-import com.goTenna.codingchallenge.view.MainActivity;
 import com.mapbox.android.core.location.LocationEngine;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.geojson.Feature;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.mapboxsdk.camera.CameraPosition;
+import com.mapbox.mapboxsdk.annotations.Marker;
+import com.mapbox.mapboxsdk.annotations.MarkerOptions;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
 import com.mapbox.mapboxsdk.geometry.LatLng;
 import com.mapbox.mapboxsdk.location.LocationComponent;
@@ -42,22 +41,19 @@ import java.util.List;
 
 public class MapActivity extends AppCompatActivity implements
         PermissionsListener, OnMapReadyCallback, OnLocationClickListener, OnCameraTrackingChangedListener {
-    public static final String TAG = "TAG";
+    public static final String LAT = "LAT";
+    public static final String LNG = "LNG";
+    public static final String NAME = "NAME";
     private MapView mapView;
     private MapboxMap mapboxMap;
     private PermissionsManager permissionsManager;
-    private LocationEngine locationEngine;
-    private LocationListeningCallback callback;
-    private Location originLocation;
     private LocationComponent locationComponent;
     private FloatingActionButton fab;
     private boolean isTracking = false;
-
-    public static final String LAT = "LAT";
-    public static final String LNG = "LNG";
-
     private double lat;
     private double lng;
+    private String name;
+    private Marker marker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,76 +64,52 @@ public class MapActivity extends AppCompatActivity implements
         checkIntent();
         checkState(savedInstanceState);
         setMapView(savedInstanceState);
-        Log.d(TAG, "Lat: " + lat);
-        Log.d(TAG, "Lng: " + lng);
+    }
+
+    private void initialize() {
+        mapView = findViewById(R.id.mapView);
+        fab = findViewById(R.id.compassfab);
+    }
+
+    private void checkIntent() {
+        lat = getIntent().getDoubleExtra(LAT, 0.0);
+        lng = getIntent().getDoubleExtra(LNG, 0.0);
+        name = getIntent().getStringExtra(NAME);
+    }
+
+    private void checkState(final Bundle savedInstanceState) {
+        if (savedInstanceState != null) {
+            lat = savedInstanceState.getDouble(LAT);
+            lng = savedInstanceState.getDouble(LNG);
+            name = savedInstanceState.getString(NAME);
+        }
     }
 
     @Override
     public void onMapReady(@NonNull MapboxMap mapboxMap) {
         this.mapboxMap = mapboxMap;
-        mapboxMap.setStyle(Style.DARK, new Style.OnStyleLoaded() {
-            @Override
-            public void onStyleLoaded(@NonNull Style style) {
-                enableLocationComponent(style, lat, lng);
-                createMarker(style);
-            }
+        mapboxMap.setStyle(Style.DARK, style -> {
+            enableLocationComponent(style, lat, lng);
+            createMarker();
         });
     }
 
-    public void createMarker(Style style){
-        style.addImage("marker-icon-id",
-                BitmapFactory.decodeResource(
-                        MapActivity.this.getResources(), R.drawable.mapbox_marker_icon_default));
-
-        GeoJsonSource geoJsonSource = new GeoJsonSource("source-id", Feature.fromGeometry(
-                Point.fromLngLat(lng, lat)));
-        style.addSource(geoJsonSource);
-
-        SymbolLayer symbolLayer = new SymbolLayer("layer-id", "source-id");
-        symbolLayer.withProperties(
-                PropertyFactory.iconImage("marker-icon-id")
-        );
-        style.addLayer(symbolLayer);
+    private void createMarker(){
+        marker = mapboxMap.addMarker(new MarkerOptions()
+                .position(new LatLng(lat, lng))
+                .title(name));
+        marker.showInfoWindow(mapboxMap, mapView);
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        mapView.onSaveInstanceState(outState);
-        lat = getIntent().getDoubleExtra(LAT, 0.0);
-        lng = getIntent().getDoubleExtra(LNG, 0.0);
-        outState.putDouble(LAT, lat);
-        outState.putDouble(LNG, lng);
-    }
-
-    public void checkIntent() {
-        lat = getIntent().getDoubleExtra(LAT, 0.0);
-        lng = getIntent().getDoubleExtra(LNG, 0.0);
-    }
-
-    public void checkState(final Bundle savedInstanceState) {
-        if (savedInstanceState != null) {
-            lat = savedInstanceState.getDouble(LAT);
-            lng = savedInstanceState.getDouble(LNG);
-        }
-    }
-
-
-    public void initialize() {
-        mapView = findViewById(R.id.mapView);
-        fab = findViewById(R.id.compassfab);
-        callback = new LocationListeningCallback(this);
-    }
-
-    public void setMapView(final Bundle savedInstanceState) {
+    private void setMapView(final Bundle savedInstanceState) {
         mapView.onCreate(savedInstanceState);
         mapView.getMapAsync(this);
 
     }
 
-    private void enableLocationComponent(Style style, double lat, double lng) {
+    void enableLocationComponent(Style style, double lat, double lng) {
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
-           locationComponenetSetup(style);
+           locationComponentSetup(style);
            mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 16f));
            fabClick();
 
@@ -147,45 +119,56 @@ public class MapActivity extends AppCompatActivity implements
         }
     }
 
-    public void fabClick(){
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!isTracking) {
-                    isTracking = true;
-                    locationComponent.setCameraMode(CameraMode.TRACKING);
-                    locationComponent.zoomWhileTracking(16f);
-                    Toast.makeText(MapActivity.this, "GOING TO CURRENT LOCATION", Toast.LENGTH_SHORT).show();
-                }else{
-                    Toast.makeText(MapActivity.this, "LOCATION ALREADY ENABLED", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-    }
-
-    @SuppressLint("MissingPermission")
-    public void locationComponenetSetup(Style style){
+    public void locationComponentSetup(Style style) {
         LocationComponentOptions customLocationComponentOptions = LocationComponentOptions.builder(this)
                 .elevation(5)
                 .accuracyAlpha(.6f)
                 .build();
-
         locationComponent = mapboxMap.getLocationComponent();
+        locationComponentActivation(style, customLocationComponentOptions);
+    }
 
+    @SuppressLint("MissingPermission")
+    public void locationComponentActivation(Style style, LocationComponentOptions customLocationComponentOptions){
         LocationComponentActivationOptions locationComponentActivationOptions =
                 LocationComponentActivationOptions.builder(this, style)
                         .locationComponentOptions(customLocationComponentOptions)
                         .build();
 
-
         locationComponent.activateLocationComponent(locationComponentActivationOptions);
         locationComponent.setLocationComponentEnabled(true);
-        locationComponent.setCameraMode(CameraMode.TRACKING);
+        locationComponent.setCameraMode(CameraMode.TRACKING_COMPASS);
         locationComponent.setRenderMode(RenderMode.COMPASS);
         locationComponent.addOnLocationClickListener(this);
         locationComponent.addOnCameraTrackingChangedListener(this);
     }
 
+    public void fabClick(){
+        fab.setOnClickListener(v -> {
+            if (!isTracking) {
+                isTracking = true;
+                locationComponent.setCameraMode(CameraMode.TRACKING);
+                locationComponent.zoomWhileTracking(16f);
+                mapboxMap.removeMarker(marker);
+                Toast.makeText(MapActivity.this, "GOING TO CURRENT LOCATION", Toast.LENGTH_SHORT).show();
+            }else{
+                Toast.makeText(MapActivity.this, "LOCATION ALREADY ENABLED", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        mapView.onSaveInstanceState(outState);
+        lat = getIntent().getDoubleExtra(LAT, 0.0);
+        lng = getIntent().getDoubleExtra(LNG, 0.0);
+        name = getIntent().getStringExtra(NAME);
+
+        outState.putDouble(LAT, lat);
+        outState.putDouble(LNG, lng);
+        outState.putString(NAME, name);
+    }
 
     @Override
     public void onExplanationNeeded(List<String> permissionsToExplain) {
@@ -195,11 +178,9 @@ public class MapActivity extends AppCompatActivity implements
     @Override
     public void onPermissionResult(boolean granted) {
         if (granted) {
-            mapboxMap.getStyle(new Style.OnStyleLoaded() {
-                @Override
-                public void onStyleLoaded(@NonNull Style style) {
-                    enableLocationComponent(style, lat, lng);
-                }
+            mapboxMap.getStyle(style -> {
+                enableLocationComponent(style, lat, lng);
+                createMarker();
             });
         } else {
             Toast.makeText(this, "ACCESS DENIED", Toast.LENGTH_LONG).show();
@@ -211,6 +192,21 @@ public class MapActivity extends AppCompatActivity implements
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    @Override
+    public void onCameraTrackingDismissed() {
+        isTracking = false;
+    }
+
+    @Override
+    public void onCameraTrackingChanged(int currentMode) {
+
+    }
+
+    @Override
+    public void onLocationComponentClick() {
+
     }
 
     @Override
@@ -240,9 +236,6 @@ public class MapActivity extends AppCompatActivity implements
     @Override
     protected void onStop() {
         super.onStop();
-        if (locationEngine != null) {
-            locationEngine.removeLocationUpdates(callback);
-        }
         mapView.onStop();
     }
 
@@ -252,21 +245,4 @@ public class MapActivity extends AppCompatActivity implements
         mapView.onDestroy();
     }
 
-
-    @Override
-    public void onLocationComponentClick() {
-        if (locationComponent.getLastKnownLocation() != null) {
-            Toast.makeText(this, "Clicking location component", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    @Override
-    public void onCameraTrackingDismissed() {
-        isTracking = false;
-    }
-
-    @Override
-    public void onCameraTrackingChanged(int currentMode) {
-
-    }
 }
