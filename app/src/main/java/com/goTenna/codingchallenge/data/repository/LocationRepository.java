@@ -2,12 +2,10 @@ package com.goTenna.codingchallenge.data.repository;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.LiveDataReactiveStreams;
 
 import com.goTenna.codingchallenge.data.database.LocationDatabase;
-import com.goTenna.codingchallenge.data.model.Location;
-import com.goTenna.codingchallenge.network.LocationRetroFit;
+import com.goTenna.codingchallenge.data.model.LocationObject;
+import com.goTenna.codingchallenge.data.network.LocationRetroFit;
 
 import java.util.List;
 
@@ -21,57 +19,30 @@ import io.reactivex.schedulers.Schedulers;
 
 public class LocationRepository {
     private LocationDatabase locationDatabase;
-    public static final String TAG = "TAG";
     private static LocationRepository instance;
     private CompositeDisposable disposables = new CompositeDisposable();
 
-    private LocationRepository(Application application){
+    private LocationRepository(final Application application) {
         locationDatabase = LocationDatabase.getInstance(application.getApplicationContext());
     }
 
-    public static LocationRepository getInstance(Application application){
-        if(instance == null){
+    public static LocationRepository getInstance(Application application) {
+        if (instance == null) {
             instance = new LocationRepository(application);
         }
         return instance;
     }
 
     @SuppressLint("CheckResult")
-    public Flowable<List<Location>> getAllLocations(){
+    public Flowable<List<LocationObject>> getAllLocations() {
         return locationDatabase.locationDao().getAllLocations();
     }
 
     @SuppressLint("CheckResult")
-    public void insertLocation(final Location location){
-//        Completable.fromAction(() -> locationDatabase.locationDao().insert(location));
+    public void insertLocation(final LocationObject locationObject) {
+//        Completable.fromAction(() -> locationDatabase.locationDao().insert(locationObject));
 
-        Completable.fromRunnable(() -> locationDatabase.locationDao().insert(location))
-                .subscribeOn(Schedulers.io())
-        .subscribe(new CompletableObserver() {
-            @Override
-            public void onSubscribe(Disposable d) {
-                disposables.add(d);
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                e.printStackTrace();
-            }
-        });
-
-//        locationDatabase.locationDao().insert(location);
-    }
-
-    @SuppressLint("CheckResult")
-    public void deleteLocation(final Location location){
-//        Completable.fromAction(() -> locationDatabase.locationDao().delete(location));
-
-        Completable.fromRunnable(() -> locationDatabase.locationDao().delete(location))
+        Completable.fromRunnable(() -> locationDatabase.locationDao().insert(locationObject))
                 .subscribeOn(Schedulers.io())
                 .subscribe(new CompletableObserver() {
                     @Override
@@ -90,11 +61,11 @@ public class LocationRepository {
                     }
                 });
 
-//        locationDatabase.locationDao().delete(location);
+//        locationDatabase.locationDao().insert(locationObject);
     }
 
     @SuppressLint("CheckResult")
-    public void deleteAllLocations(){
+    public void deleteAllLocations() {
         Completable.fromAction(() -> locationDatabase.clearAllTables());
 
         Completable.fromRunnable(() -> locationDatabase.clearAllTables())
@@ -120,11 +91,19 @@ public class LocationRepository {
     }
 
 
-    public LiveData<List<Location>> getLocationsFromApi(){
-        return LiveDataReactiveStreams.fromPublisher(LocationRetroFit
+    @SuppressLint("CheckResult")
+    public void callRetroFit() {
+        LocationRetroFit
                 .getService()
                 .getLocation()
-                .observeOn(Schedulers.io()));
+                .subscribeOn(Schedulers.io())
+                .subscribe(locations -> {
+                    if (locations != null) {
+                        for (int i = 0; i < locations.size(); i++) {
+                            insertLocation(locations.get(i));
+                        }
+                    }
+                }, Throwable::printStackTrace);
     }
 
     public CompositeDisposable getDisposables() {
