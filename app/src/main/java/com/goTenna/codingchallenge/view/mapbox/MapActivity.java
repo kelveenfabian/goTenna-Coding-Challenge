@@ -77,22 +77,28 @@ public class MapActivity extends AppCompatActivity implements
             @Override
             public void onStyleLoaded(@NonNull Style style) {
                 enableLocationComponent(style, lat, lng);
-                style.addImage("marker-icon-id",
-                        BitmapFactory.decodeResource(
-                                MapActivity.this.getResources(), R.drawable.mapbox_marker_icon_default));
-
-                GeoJsonSource geoJsonSource = new GeoJsonSource("source-id", Feature.fromGeometry(
-                        Point.fromLngLat(lng, lat)));
-                style.addSource(geoJsonSource);
-
-                SymbolLayer symbolLayer = new SymbolLayer("layer-id", "source-id");
-                symbolLayer.withProperties(
-                        PropertyFactory.iconImage("marker-icon-id")
-                );
-                style.addLayer(symbolLayer);
+                createMarker(style);
             }
         });
     }
+
+    public void createMarker(Style style){
+        style.addImage("marker-icon-id",
+                BitmapFactory.decodeResource(
+                        MapActivity.this.getResources(), R.drawable.mapbox_marker_icon_default));
+
+        GeoJsonSource geoJsonSource = new GeoJsonSource("source-id", Feature.fromGeometry(
+                Point.fromLngLat(lng, lat)));
+        style.addSource(geoJsonSource);
+
+        SymbolLayer symbolLayer = new SymbolLayer("layer-id", "source-id");
+        symbolLayer.withProperties(
+                PropertyFactory.iconImage("marker-icon-id")
+        );
+
+        style.addLayer(symbolLayer);
+    }
+
 
 
     @Override
@@ -135,6 +141,17 @@ public class MapActivity extends AppCompatActivity implements
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
             mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 16f));
 
+            fab.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if(!isTracking){
+
+                    }else{
+
+                    }
+                }
+            });
+
         } else {
             permissionsManager = new PermissionsManager(this);
             permissionsManager.requestLocationPermissions(this);
@@ -154,6 +171,7 @@ public class MapActivity extends AppCompatActivity implements
                 @Override
                 public void onStyleLoaded(@NonNull Style style) {
                     enableLocationComponent(style, lat, lng);
+                    createMarker(style);
                 }
             });
         } else {
