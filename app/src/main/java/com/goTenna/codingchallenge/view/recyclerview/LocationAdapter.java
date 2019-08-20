@@ -7,15 +7,15 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.goTenna.codingchallenge.R;
-import com.goTenna.codingchallenge.data.model.Location;
+import com.goTenna.codingchallenge.data.model.LocationObject;
 
 import java.util.List;
 
 public class LocationAdapter extends RecyclerView.Adapter<LocationVH> {
-    private List<Location> locationList;
+    private List<LocationObject> locationObjectList;
 
-    public LocationAdapter(List<Location> locationList){
-        this.locationList = locationList;
+    public LocationAdapter(List<LocationObject> locationObjectList){
+        this.locationObjectList = locationObjectList;
     }
 
     @NonNull
@@ -27,11 +27,11 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationVH> {
 
     @Override
     public void onBindViewHolder(@NonNull LocationVH holder, int position) {
-        holder.onBind(locationList.get(position));
+        holder.onBind(locationObjectList.get(position));
     }
 
     @Override
     public int getItemCount() {
-        return locationList.size();
+        return locationObjectList.size();
     }
 }

@@ -5,9 +5,9 @@ import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
 
-import com.goTenna.codingchallenge.data.model.Location;
+import com.goTenna.codingchallenge.data.model.LocationObject;
 
-@Database(entities = {Location.class}, version = 1, exportSchema = false)
+@Database(entities = {LocationObject.class}, version = 1, exportSchema = false)
 public abstract class LocationDatabase extends RoomDatabase {
     private static LocationDatabase instance;
     private static final String DB_NAME = "location_db";

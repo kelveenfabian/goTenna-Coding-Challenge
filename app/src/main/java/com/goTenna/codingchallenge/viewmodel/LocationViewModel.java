@@ -4,14 +4,12 @@ import android.app.Application;
 import android.arch.lifecycle.AndroidViewModel;
 import android.support.annotation.NonNull;
 
-import com.goTenna.codingchallenge.data.model.Location;
+import com.goTenna.codingchallenge.data.model.LocationObject;
 import com.goTenna.codingchallenge.data.repository.LocationRepository;
 
 import java.util.List;
 
-import io.reactivex.Completable;
 import io.reactivex.Flowable;
-import io.reactivex.Observable;
 
 
 public class LocationViewModel extends AndroidViewModel {
@@ -26,7 +24,7 @@ public class LocationViewModel extends AndroidViewModel {
         repository.deleteAllLocations();
     }
 
-    public Flowable<List<Location>> getAllLocations() {
+    public Flowable<List<LocationObject>> getAllLocations() {
         return repository.getAllLocations();
     }
 

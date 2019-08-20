@@ -8,8 +8,8 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.goTenna.codingchallenge.R;
-import com.goTenna.codingchallenge.data.model.Location;
-import com.goTenna.codingchallenge.view.MapActivity;
+import com.goTenna.codingchallenge.data.model.LocationObject;
+import com.goTenna.codingchallenge.view.mapbox.MapActivity;
 
 public class LocationVH extends RecyclerView.ViewHolder {
 
@@ -24,16 +24,16 @@ public class LocationVH extends RecyclerView.ViewHolder {
         locationCard = itemView.findViewById(R.id.location_card);
     }
 
-    public void onBind(final Location location){
-        String name = location.getName();
-        String description = location.getDescription();
+    public void onBind(final LocationObject locationObject){
+        String name = locationObject.getName();
+        String description = locationObject.getDescription();
 
         nameView.setText(name);
         descriptionView.setText(description);
         locationCard.setOnClickListener(v -> {
             Intent intent = new Intent(v.getContext(), MapActivity.class);
-            intent.putExtra(MapActivity.LAT, location.getLatitude());
-            intent.putExtra(MapActivity.LNG, location.getLongitude());
+            intent.putExtra(MapActivity.LAT, locationObject.getLatitude());
+            intent.putExtra(MapActivity.LNG, locationObject.getLongitude());
             v.getContext().startActivity(intent);
         });
 

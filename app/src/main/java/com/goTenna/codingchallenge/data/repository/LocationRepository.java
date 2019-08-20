@@ -4,7 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Application;
 
 import com.goTenna.codingchallenge.data.database.LocationDatabase;
-import com.goTenna.codingchallenge.data.model.Location;
+import com.goTenna.codingchallenge.data.model.LocationObject;
 import com.goTenna.codingchallenge.data.network.LocationRetroFit;
 
 import java.util.List;
@@ -13,7 +13,6 @@ import io.reactivex.Completable;
 import io.reactivex.CompletableObserver;
 import io.reactivex.Flowable;
 
-import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -35,15 +34,15 @@ public class LocationRepository {
     }
 
     @SuppressLint("CheckResult")
-    public Flowable<List<Location>> getAllLocations() {
+    public Flowable<List<LocationObject>> getAllLocations() {
         return locationDatabase.locationDao().getAllLocations();
     }
 
     @SuppressLint("CheckResult")
-    public void insertLocation(final Location location) {
-//        Completable.fromAction(() -> locationDatabase.locationDao().insert(location));
+    public void insertLocation(final LocationObject locationObject) {
+//        Completable.fromAction(() -> locationDatabase.locationDao().insert(locationObject));
 
-        Completable.fromRunnable(() -> locationDatabase.locationDao().insert(location))
+        Completable.fromRunnable(() -> locationDatabase.locationDao().insert(locationObject))
                 .subscribeOn(Schedulers.io())
                 .subscribe(new CompletableObserver() {
                     @Override
@@ -62,7 +61,7 @@ public class LocationRepository {
                     }
                 });
 
-//        locationDatabase.locationDao().insert(location);
+//        locationDatabase.locationDao().insert(locationObject);
     }
 
     @SuppressLint("CheckResult")

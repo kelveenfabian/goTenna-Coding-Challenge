@@ -10,7 +10,8 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
 import com.goTenna.codingchallenge.R;
-import com.goTenna.codingchallenge.data.model.Location;
+import com.goTenna.codingchallenge.data.model.LocationObject;
+import com.goTenna.codingchallenge.view.mapbox.MapActivity;
 import com.goTenna.codingchallenge.view.recyclerview.LocationAdapter;
 import com.goTenna.codingchallenge.viewmodel.LocationViewModel;
 
@@ -43,8 +44,8 @@ public class MainActivity extends AppCompatActivity {
         viewModel = ViewModelProviders.of(this).get(LocationViewModel.class);
     }
 
-    public void setRecyclerView(final List<Location> locationList) {
-        LocationAdapter adapter = new LocationAdapter(locationList);
+    public void setRecyclerView(final List<LocationObject> locationObjectList) {
+        LocationAdapter adapter = new LocationAdapter(locationObjectList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
     }
