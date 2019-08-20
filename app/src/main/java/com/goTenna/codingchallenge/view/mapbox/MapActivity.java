@@ -41,7 +41,7 @@ import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
 import java.util.List;
 
 public class MapActivity extends AppCompatActivity implements
-        PermissionsListener, OnMapReadyCallback, OnLocationClickListener, OnCameraTrackingChangedListener {
+        PermissionsListener, OnMapReadyCallback {
     public static final String TAG = "TAG";
     private MapView mapView;
     private MapboxMap mapboxMap;
@@ -133,9 +133,7 @@ public class MapActivity extends AppCompatActivity implements
     @SuppressLint("MissingPermission")
     private void enableLocationComponent(Style style, double lat, double lng) {
         if (PermissionsManager.areLocationPermissionsGranted(this)) {
-
-
-
+            mapboxMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lat, lng), 16f));
 
         } else {
             permissionsManager = new PermissionsManager(this);
@@ -206,21 +204,4 @@ public class MapActivity extends AppCompatActivity implements
         mapView.onDestroy();
     }
 
-
-    @Override
-    public void onLocationComponentClick() {
-        if (locationComponent.getLastKnownLocation() != null) {
-            Toast.makeText(this, "Clicking location component", Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    @Override
-    public void onCameraTrackingDismissed() {
-        isTracking = false;
-    }
-
-    @Override
-    public void onCameraTrackingChanged(int currentMode) {
-
-    }
 }
