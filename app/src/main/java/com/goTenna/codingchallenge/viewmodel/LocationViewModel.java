@@ -46,4 +46,5 @@ public class LocationViewModel extends AndroidViewModel {
         super.onCleared();
         repository.getDisposables().clear();
     }
+
 }

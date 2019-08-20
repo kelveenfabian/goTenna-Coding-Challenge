@@ -2,12 +2,10 @@ package com.goTenna.codingchallenge.data.repository;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
-import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.LiveDataReactiveStreams;
 
 import com.goTenna.codingchallenge.data.database.LocationDatabase;
 import com.goTenna.codingchallenge.data.model.Location;
-import com.goTenna.codingchallenge.network.LocationRetroFit;
+import com.goTenna.codingchallenge.data.network.LocationRetroFit;
 
 import java.util.List;
 
@@ -15,10 +13,8 @@ import io.reactivex.Completable;
 import io.reactivex.CompletableObserver;
 import io.reactivex.Flowable;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 public class LocationRepository {
