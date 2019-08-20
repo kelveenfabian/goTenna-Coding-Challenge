@@ -150,7 +150,6 @@ public class MapActivity extends AppCompatActivity implements
                 locationComponent.setCameraMode(CameraMode.TRACKING);
                 locationComponent.zoomWhileTracking(16f);
                 mapboxMap.removeMarker(marker);
-                Toast.makeText(MapActivity.this, "GOING TO CURRENT LOCATION", Toast.LENGTH_SHORT).show();
             }else{
                 Toast.makeText(MapActivity.this, "LOCATION ALREADY ENABLED", Toast.LENGTH_SHORT).show();
             }
